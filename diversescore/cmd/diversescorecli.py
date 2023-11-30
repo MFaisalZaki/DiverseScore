@@ -30,8 +30,7 @@ def main(args=None):
     _diversity_model = {
         'MaxSum': MaxSum,
         'MaxMin': MaxMin,
-        'MaxMean': MaxMean,
-        'NormalizedMaxSum': NormalizedMaxSum
+        'MaxMean': MaxMean
     }
 
     _metric = {
@@ -41,7 +40,7 @@ def main(args=None):
     }
 
     metric = _metric[args.metric](groudned_task)
-    model  = _diversity_model[args.diversity_model](metric)
+    model  = _diversity_model[args.diversity_model](metric, args.normalize)
     print(f'The {args.diversity_model} score using {args.metric} metric is {(model(plans))}')
 
 if __name__ == '__main__':

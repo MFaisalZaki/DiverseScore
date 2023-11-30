@@ -24,8 +24,9 @@ def create_parser():
     parser.add_argument('-domain', help='Path to PDDL domain file', type=_is_valid_file)
     parser.add_argument('-problem', metavar='problem.pddl', help='Path to PDDL problem file', type=_is_valid_file)
 
-    parser.add_argument('-diversity-model', choices=['MaxSum', 'MaxMin', 'MaxMean', 'NormalizedMaxSum'], default='MaxSum', help='Diversity model to be used.')
+    parser.add_argument('-diversity-model', choices=['MaxSum', 'MaxMin', 'MaxMean'], default='MaxSum', help='Diversity model to be used.')
     parser.add_argument('-metric', choices=['States', 'Stability', 'Uniqueness'], default='States', help='Metric to be used.')
     parser.add_argument('-plansdir', help='Path to directory containing plans.', type=str)
+    parser.add_argument('-normalize', action='store_true', help='Normalize the metric score.', default=False)
 
     return parser

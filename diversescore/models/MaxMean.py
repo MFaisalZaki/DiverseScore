@@ -12,9 +12,9 @@ class MaxMean(Model):
            and R. Mart´ı, “Diversity and equity models,” in Handbook of Heuristics, 2018.
     """
 
-    def __init__(self, metric):
+    def __init__(self, metric, normalize=False):
         """Initialize the metric object."""
-        super(MaxMean, self).__init__(metric=metric, name="MaxMean")
+        super(MaxMean, self).__init__(metric=metric, normalize=normalize, name="MaxMean")
         
     def __call__(self, planset):
         """Compute the metric for planset."""

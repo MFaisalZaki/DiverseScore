@@ -10,7 +10,6 @@ from diversescore.models.base import Model
 from diversescore.models.MaxSum import MaxSum
 from diversescore.models.MaxMin import MaxMin
 from diversescore.models.MaxMean import MaxMean
-from diversescore.models.NormalizedMaxSum import NormalizedMaxSum
 
 from diversescore.utilities import readPlansDir
 

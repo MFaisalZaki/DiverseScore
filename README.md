@@ -2,27 +2,26 @@
 This Python package computes several diversity models using different distance metrics for plan sets in SAS+ format. 
 
 ## Available Diversity Models
-- [x] MaxSum: The sum of pairwise distance between plans in a provided set of plans.
-- [x] NormlaizedMaxSum: Normalized sum of the pairwise distance between plans into a provided set of plans to the number of pairs.
-- [x] MaxMean: Average sum of the pairwise distance between plans in a provided set of plans.
-- [x] MaxMin: The minimum distance between plans in a provided set of plans.
+[ ] MaxSum: The sum of pairwise distance between plans in a provided set of plans.
+[ ] MaxMean: Average sum of the pairwise distance between plans in a provided set of plans.
+[ ] MaxMin: The minimum distance between a plans in a provided set of plans.
 
 ## Available Distance Functions
-- [x] Stability: Jaccard measure between two plan's actions.
-- [x] States: Average Jaccard measure between two plan's states.
-- [x] Uniqueness: Set difference between two plan's actions.
-- [ ] Causal-links: Jaccard measure between two plan's casual links (TODO).
+[ ] Stability: Jaccard measure between two plan's actions.
+[ ] States: Average jaccard measure between two plan's states.
+[ ] Uniqueness: Set difference between two plan's actions.
+[ ] Causal-links: Jaccard measure between two plan's casual links (TODO).
 
 # How to use
 ## Installation
 ```
-python -m pip install git+https://github.com/MFaisalZaki/DiverseScore.git
+python -m pip install git+
 ```
 
 ## CLI
 DiverseScore has a cli, which can be invoked as follows:
 ```
-diversescorecli [-h] [-domain DOMAIN] [-problem problem.pddl] [-diversity-model {MaxSum,MaxMin,MaxMean,NormalizedMaxSum}] [-metric {States,Stability,Uniqueness}] [-plansdir PLANSDIR]
+diversescorecli [-h] [-domain DOMAIN] [-problem problem.pddl] [-diversity-model {MaxSum,MaxMin,MaxMean}] [-metric {States,Stability,Uniqueness}] [-plansdir PLANSDIR]
 ```
 ## Python Import
 DiverseScore can be integrated into any Python project, here is a simple code to compute the MaxSum score using Stability Metric.
