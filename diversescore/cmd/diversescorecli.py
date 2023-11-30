@@ -5,6 +5,7 @@ import os
 from unified_planning.shortcuts import *
 from diversescore.shortcuts import *
 
+
 from . import arguments
 
 def main(args=None):
@@ -24,12 +25,8 @@ def main(args=None):
         groudned_task = grounder.compile(task, compilation_kind=CompilationKind.GROUNDING)
 
     # Read plans from directory
-    plans = []
-    for filename in os.listdir(args.plansdir):
-        planfile = os.path.join(args.plansdir, filename)
-        with open(planfile, 'r') as f:
-            plans.append(f.read().splitlines())
-
+    plans = readPlansDir(args.plansdir)
+    
     _diversity_model = {
         'MaxSum': MaxSum,
         'MaxMin': MaxMin,
@@ -43,9 +40,9 @@ def main(args=None):
         'Uniqueness': Uniqueness
     }
 
-    metric = _metric[args.metric](task)
-    model  = _diversity_model[args.diversity_model](task, metric)
-    print(model(plans))
+    metric = _metric[args.metric](groudned_task)
+    model  = _diversity_model[args.diversity_model](metric)
+    print(f'The {args.diversity_model} score using {args.metric} metric is {(model(plans))}')
 
 if __name__ == '__main__':
     main(sys.argv[1:])

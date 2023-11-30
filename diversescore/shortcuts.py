@@ -1,16 +1,16 @@
 from unified_planning.io import PDDLReader
 from unified_planning.shortcuts import *
 
-from metrics.base import Metric
-from metrics.Stability import Stability
-from metrics.States import States
-from metrics.Uniqueness import Uniqueness
+from diversescore.metrics.base import Metric
+from diversescore.metrics.Stability import Stability
+from diversescore.metrics.States import States
+from diversescore.metrics.Uniqueness import Uniqueness
 
-from models.base import Model
-from models.MaxSum import MaxSum
-from models.MaxMin import MaxMin
-from models.MaxMean import MaxMean
-from models.NormalizedMaxSum import NormalizedMaxSum
+from diversescore.models.base import Model
+from diversescore.models.MaxSum import MaxSum
+from diversescore.models.MaxMin import MaxMin
+from diversescore.models.MaxMean import MaxMean
+from diversescore.models.NormalizedMaxSum import NormalizedMaxSum
 
-
+from diversescore.utilities import readPlansDir
 
