@@ -16,7 +16,7 @@ This Python package computes several diversity models using different distance m
 # How to use
 ## Installation
 ```
-python -m pip install git+
+python -m pip install git+https://github.com/MFaisalZaki/DiverseScore.git
 ```
 
 ## CLI
