@@ -2,15 +2,15 @@
 This Python package computes several diversity models using different distance metrics for plan sets in SAS+ format. 
 
 ## Available Diversity Models
-[ ] MaxSum: The sum of pairwise distance between plans in a provided set of plans.
-[ ] MaxMean: Average sum of the pairwise distance between plans in a provided set of plans.
-[ ] MaxMin: The minimum distance between a plans in a provided set of plans.
+- [ ] MaxSum: The sum of pairwise distance between plans in a provided set of plans.
+- [ ] MaxMean: Average sum of the pairwise distance between plans in a provided set of plans.
+- [ ] MaxMin: The minimum distance between a plans in a provided set of plans.
 
 ## Available Distance Functions
-[ ] Stability: Jaccard measure between two plan's actions.
-[ ] States: Average jaccard measure between two plan's states.
-[ ] Uniqueness: Set difference between two plan's actions.
-[ ] Causal-links: Jaccard measure between two plan's casual links (TODO).
+- [ ] Stability: Jaccard measure between two plan's actions.
+- [ ] States: Average jaccard measure between two plan's states.
+- [ ] Uniqueness: Set difference between two plan's actions.
+- [ ] Causal-links: Jaccard measure between two plan's casual links (TODO).
 
 # How to use
 ## Installation
