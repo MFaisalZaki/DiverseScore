@@ -25,7 +25,7 @@ def main(args=None):
         groudned_task = grounder.compile(task, compilation_kind=CompilationKind.GROUNDING)
 
     # Read plans from directory
-    plans = readPlansDir(args.plansdir)
+    plans = loadPlansDir(args.plansdir)
     
     _diversity_model = {
         'MaxSum': MaxSum,

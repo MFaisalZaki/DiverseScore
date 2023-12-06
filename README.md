@@ -40,7 +40,7 @@ task = PDDLReader().parse_problem(domain, problem)
 with Compiler(problem_kind=task.kind, compilation_kind=CompilationKind.GROUNDING) as grounder:
     groudned_task = grounder.compile(task, compilation_kind=CompilationKind.GROUNDING)
 # Load the plans from directory
-plans = readPlansDir(plansdir)
+plans = loadPlansDir(plansdir)
 maxsum_stability_score = MaxSum(Stability(groudned_task))
 ```
 
