@@ -57,9 +57,10 @@ def simlatePlan(plan, grounded_problem):
 def dumpPlans(planset, k, dumpdir):
     for i, plan in enumerate(planset[:k]):
         with open(os.path.join(dumpdir, f'sas_plan.{i+1}'), 'w') as f:
-            for action in plan[:-1]:
-                f.write('({})\n'.format(action))
-            f.write('{}'.format(plan[-1]))
+            for action in plan:
+                if action.startswith(";"):
+                    f.write(f'{action}')
+                f.write(f'{action}\n' if action.startswith("(") and action.endswith(")") else f'({action})\n')
 
 def dumpScores(scores, dumpdir, filename):
     with open(os.path.join(dumpdir, f'{filename}.json'), 'w') as f:
