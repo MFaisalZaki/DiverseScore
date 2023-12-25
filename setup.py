@@ -32,15 +32,15 @@ except ImportError:
     bdist_wheel = None
 
 IBM_DIVERSESCORE_NAME = 'ibm-diversescore'
+CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
+IBM_DIVERSESCORE_DIR = os.path.join(CURRENT_DIR, IBM_DIVERSESCORE_NAME)
 
 def clone_and_compile_ibm_diversescore():
-    curr_dir = os.path.dirname(os.path.realpath(__file__))
-    ibm_diversescore_dir = os.path.join(curr_dir, IBM_DIVERSESCORE_NAME)
     try:
-        subprocess.run(['git', 'clone', 'https://github.com/IBM/diversescore.git', IBM_DIVERSESCORE_NAME], cwd=curr_dir)
+        subprocess.run(['git', 'clone', 'https://github.com/IBM/diversescore.git', IBM_DIVERSESCORE_NAME], cwd=CURRENT_DIR)
     except:
         pass
-    subprocess.run([sys.executable, 'build.py'], cwd=ibm_diversescore_dir)
+    subprocess.run([sys.executable, 'build.py'], cwd=IBM_DIVERSESCORE_DIR)
 
 class install_ibm_diverse_score(build_py):
     """Custom install command."""
@@ -71,15 +71,15 @@ setup(
         ],
     },
     package_data={
-        "": [f'{IBM_DIVERSESCORE_NAME}/fast-downward.py',
-            f'{IBM_DIVERSESCORE_NAME}/README.md', 
-            f'{IBM_DIVERSESCORE_NAME}/LICENSE.md',
-            f'{IBM_DIVERSESCORE_NAME}/builds/release/bin/*',
-            f'{IBM_DIVERSESCORE_NAME}/builds/release/bin/translate/*',
-            f'{IBM_DIVERSESCORE_NAME}/builds/release/bin/translate/pddl/*',
-            f'{IBM_DIVERSESCORE_NAME}/builds/release/bin/translate/pddl_parser/*',
-            f'{IBM_DIVERSESCORE_NAME}/driver/*', 
-            f'{IBM_DIVERSESCORE_NAME}/driver/portfolios/*']
+        "": [f'{IBM_DIVERSESCORE_DIR}/fast-downward.py',
+            f'{IBM_DIVERSESCORE_DIR}/README.md', 
+            f'{IBM_DIVERSESCORE_DIR}/LICENSE.md',
+            f'{IBM_DIVERSESCORE_DIR}/builds/release/bin/*',
+            f'{IBM_DIVERSESCORE_DIR}/builds/release/bin/translate/*',
+            f'{IBM_DIVERSESCORE_DIR}/builds/release/bin/translate/pddl/*',
+            f'{IBM_DIVERSESCORE_DIR}/builds/release/bin/translate/pddl_parser/*',
+            f'{IBM_DIVERSESCORE_DIR}/driver/*', 
+            f'{IBM_DIVERSESCORE_DIR}/driver/portfolios/*']
       },
     cmdclass={
         'bdist_wheel': bdist_wheel,
