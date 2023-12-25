@@ -26,21 +26,13 @@ def main(args=None):
 
     # Read plans from directory
     plans = loadPlansDir(args.plansdir)
+    plans = [(constructSequentialPlan(plan, groudned_task), simlatePlan(plan, groudned_task)) for plan in plans]
     
-    _diversity_model = {
-        'MaxSum': MaxSum,
-        'MaxMin': MaxMin,
-        'MaxMean': MaxMean
-    }
-
-    _metric = {
-        'States': States,
-        'Stability': Stability,
-        'Uniqueness': Uniqueness
-    }
-
-    metric = _metric[args.metric](groudned_task)
-    model  = _diversity_model[args.diversity_model](metric, args.normalize)
+    _diversity_model = eval(args.diversity_model)
+    _metric = eval(args.metric)
+    
+    metric = _metric()
+    model  = _diversity_model([metric], args.normalize)
     print(f'The {args.diversity_model} score using {args.metric} metric is {(model(plans))}')
 
 if __name__ == '__main__':

@@ -18,8 +18,4 @@ class MaxMin(Model):
         
     def __call__(self, planset):
         """Compute the metric for planset."""
-        _mscore = []
-        for _i, ip in enumerate(planset):
-            for jp in planset[_i+1:]:
-                _mscore.append(round(1.0 - self.metric(ip, jp),  5))
-        return round(min(_mscore), 5)
+        return round(min(super().__call__(planset)), 5)

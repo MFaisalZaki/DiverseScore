@@ -1,3 +1,4 @@
+from unified_planning.plans import SequentialPlan
 
 from .base import Metric
 
@@ -13,19 +14,16 @@ class Stability(Metric):
            preferences,” Artificial Intelligence, vol. 190, pp. 1–31, 2012.
     """
 
-    def __init__(self, grounded_task):
+    def __init__(self):
         """Initialize a stability metric object."""
-        super(Stability, self).__init__(grounded_task.problem, name="Stability")
+        super(Stability, self).__init__(name="Stability")
     
-    def __call__(self, plana, planb):
-        
-        plana = self.constructSequentialPlan(plana)
-        planb = self.constructSequentialPlan(planb)
+    def __call__(self, plana:tuple, planb:tuple):
 
-        if len(plana.actions) < len(planb.actions):
+        if len(plana[0].actions) < len(planb[0].actions):
             return self(planb, plana)
     
-        plana_actions = set([a.action.name for a in plana.actions])
-        planb_actions = set([a.action.name for a in planb.actions])
+        plana_actions = set([a.action.name for a in plana[0].actions])
+        planb_actions = set([a.action.name for a in planb[0].actions])
 
-        return 1.0 - len(plana_actions.intersection(planb_actions)) / len(plana_actions.union(planb_actions))
+        return len(plana_actions.intersection(planb_actions)) / len(plana_actions.union(planb_actions))

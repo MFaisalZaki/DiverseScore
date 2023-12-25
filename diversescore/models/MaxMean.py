@@ -12,14 +12,10 @@ class MaxMean(Model):
            and R. Mart´ı, “Diversity and equity models,” in Handbook of Heuristics, 2018.
     """
 
-    def __init__(self, metric, normalize=False):
+    def __init__(self, metrics, normalize=False):
         """Initialize the metric object."""
-        super(MaxMean, self).__init__(metric=metric, normalize=normalize, name="MaxMean")
+        super(MaxMean, self).__init__(metrics=metrics, normalize=normalize, name="MaxMean")
         
     def __call__(self, planset):
         """Compute the metric for planset."""
-        _mscore = []
-        for _i, ip in enumerate(planset):
-            for jp in planset[_i+1:]:
-                _mscore.append(round(1.0 - self.metric(ip, jp),  5))
-        return round(sum(_mscore)/len(planset), 5)
+        return round(sum(super().__call__(planset))/len(planset), 5)

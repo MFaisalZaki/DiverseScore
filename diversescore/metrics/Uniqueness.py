@@ -1,4 +1,4 @@
-
+from unified_planning.plans import SequentialPlan
 from .base import Metric
 
 class Uniqueness(Metric):
@@ -14,20 +14,16 @@ class Uniqueness(Metric):
            volume 24, 253–261.
     """
 
-    def __init__(self, grounded_task):
+    def __init__(self):
         """Initialize a uniqueness metric object."""
-        super(Uniqueness, self).__init__(grounded_task.problem, name="Uniqueness")
+        super(Uniqueness, self).__init__(name="Uniqueness")
     
-    def __call__(self, plana, planb):
-
-        plana = self.constructSequentialPlan(plana)
-        planb = self.constructSequentialPlan(planb)
-        
-        if len(plana.actions) < len(planb.actions):
+    def __call__(self, plana:tuple, planb:tuple):
+        if len(plana[0].actions) < len(planb[0].actions):
             return self(planb, plana)
 
-        plana_actions = set([a.action.name for a in plana.actions])
-        planb_actions = set([a.action.name for a in planb.actions])
+        plana_actions = set([a.action.name for a in plana[0].actions])
+        planb_actions = set([a.action.name for a in planb[0].actions])
 
         for action in plana_actions:
             if not action in planb_actions:

@@ -11,5 +11,5 @@ from diversescore.models.MaxSum import MaxSum
 from diversescore.models.MaxMin import MaxMin
 from diversescore.models.MaxMean import MaxMean
 
-from diversescore.utilities import loadPlansDir, computePlanSetStatistics
+from diversescore.utilities import loadPlansDir, computePlanSetStatistics, constructSequentialPlan, simlatePlan
 

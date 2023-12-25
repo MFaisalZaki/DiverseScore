@@ -18,10 +18,5 @@ class MaxSum(Model):
         
     def __call__(self, planset):
         """Compute the metric for planset."""
-        _mscore = []
-        countpairs = 0
-        for _i, ip in enumerate(planset):
-            for jp in planset[_i+1:]:
-                _mscore.append(round(1.0 - self.metric(ip, jp),  5))
-                countpairs += 1
-        return round(sum(_mscore)/countpairs, 5) if self.normalize else round(sum(_mscore), 5)
+        _mscore = super().__call__(planset)
+        return round(sum(_mscore)/self.pairwise_cnt, 5) if self.normalize else round(sum(_mscore), 5)
