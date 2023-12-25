@@ -1,6 +1,8 @@
 
 import os
 from collections import defaultdict
+import tempfile
+import json
 
 from unified_planning.plans import SequentialPlan, ActionInstance
 from unified_planning.shortcuts import *
@@ -12,6 +14,11 @@ def loadPlansDir(directory):
         with open(planfile, 'r') as f:
             plans.append(f.read().splitlines())
     return plans
+
+def loadPlansJSON(jsonfile):
+    with open(jsonfile, 'r') as f:
+        plans = json.load(f)
+    return plans['plans']
 
 def computePlanSetStatistics(planset):
     retstats = defaultdict(dict)
@@ -46,3 +53,14 @@ def simlatePlan(plan, grounded_problem):
                 return []
             _states.append(current_state)
     return _states
+
+def dumpPlans(planset, k, dumpdir):
+    for i, plan in enumerate(planset[:k]):
+        with open(os.path.join(dumpdir, f'sas_plan.{i+1}'), 'w') as f:
+            for action in plan[:-1]:
+                f.write('({})\n'.format(action))
+            f.write('{}'.format(plan[-1]))
+
+def dumpScores(scores, dumpdir, filename):
+    with open(os.path.join(dumpdir, f'{filename}.json'), 'w') as f:
+        json.dump(scores, f, indent=4)

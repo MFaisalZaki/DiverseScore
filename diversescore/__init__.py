@@ -1,4 +1,4 @@
-
+import pkg_resources
 from typing import Tuple, Union
 
 VERSION: Tuple[Union[int, str], ...] = (1, 0, 0)
