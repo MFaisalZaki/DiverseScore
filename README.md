@@ -1,5 +1,6 @@
 # DiverseScore
 This Python package computes several diversity models using different distance metrics for plan sets in SAS+ format. 
+Also it wraps [IBM's diversescore](https://github.com/IBM/diversescore.git).
 
 ## Available Diversity Models
 - [x] MaxSum: The sum of pairwise distance between plans in a provided set of plans.
@@ -76,5 +77,27 @@ As for the diversity models are based on:
   author={Fernando Sandoya and Anna Mart{\'i}nez-Gavara and Ricardo Aceves and Abraham Duarte and Rafael Mart{\'i}},
   booktitle={Handbook of Heuristics},
   year={2018}
+}
+```
+
+If you are using IBM's score computation you should cite:
+```
+@InProceedings{katz-sohrabi-aaai2020,
+  title =        "Reshaping diverse planning",
+  author =       "Michael Katz and Shirin Sohrabi",
+  booktitle =    "Proceedings of the Thirty-Fourth {AAAI} Conference on
+                  Artificial Intelligence ({AAAI} 2020)",
+  publisher =    "{AAAI} Press",
+  pages =        "9892--9899",
+  year =         "2020"
+}
+
+@InProceedings{katz-et-al-aaai2022,
+  title =        "Bounding Quality in Diverse Planning",
+  author =       "Michael Katz and Shirin Sohrabi and Octavian Udrea",
+  booktitle =    "Proceedings of the Thirty-Sixth {AAAI} Conference on
+                  Artificial Intelligence ({AAAI} 2022)",
+  publisher =    "{AAAI} Press",
+  year =         "2022"
 }
 ```
