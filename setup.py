@@ -38,6 +38,14 @@ IBM_DIVERSESCORE_DIR = os.path.join(CURRENT_DIR, IBM_DIVERSESCORE_NAME)
 def clone_and_compile_ibm_diversescore():
     try:
         subprocess.run(['git', 'clone', 'https://github.com/IBM/diversescore.git', IBM_DIVERSESCORE_NAME], cwd=CURRENT_DIR)
+        # Apply patch
+        patches = []
+        patches.append(os.path.join(CURRENT_DIR, "diversescore", "patches", "diverscore.1.patch"))
+        for patch in patches:
+            try:
+                subprocess.check_call(['git','apply', patch], cwd=CURRENT_DIR)
+            except:
+                pass
     except:
         pass
     subprocess.run([sys.executable, 'build.py'], cwd=IBM_DIVERSESCORE_DIR)
