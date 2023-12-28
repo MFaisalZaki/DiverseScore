@@ -6,14 +6,14 @@ import os
 
 from diversescore.utilities import dumpPlans
 
-def IBMCalculator(domain, problem, planset, plansetsize, metricslist, **kwargs):
+def IBMCalculator(domain, problem, planset, dumpplansetsize, selectplansetsize, metricslist, **kwargs):
     downward = pkg_resources.resource_filename(__name__, os.path.join("..", "..", "ibm-diversescore", "fast-downward.py"))
     computed_scores = {}
     with tempfile.TemporaryDirectory(**kwargs) as tempdir:
         # First dump the plans in the directory
         plansdumpdir = os.path.join(tempdir, "plans")
         os.makedirs(plansdumpdir, exist_ok=True)
-        dumpPlans(planset, plansetsize, plansdumpdir)
+        dumpPlans(planset, dumpplansetsize, plansdumpdir)
 
         # Now for every metric in the metric list, we need to have its own dir.
         for metric in metricslist:
@@ -29,7 +29,7 @@ def IBMCalculator(domain, problem, planset, plansetsize, metricslist, **kwargs):
             else:
                 all_metrics = f'compute_{metric.lower()}_metric=true'
 
-            score = f"subset({all_metrics},aggregator_metric=avg,plans_as_multisets=false,plans_subset_size={plansetsize},exact_method=false,dump_plans=false,similarity=false,reduce_labels=false)"
+            score = f"subset({all_metrics},aggregator_metric=avg,plans_as_multisets=false,plans_subset_size={selectplansetsize},exact_method=false,dump_plans=false,similarity=false,reduce_labels=false)"
             result = subprocess.check_output([sys.executable, 
                                 downward, 
                                 domain, 
