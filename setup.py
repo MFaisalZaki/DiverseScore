@@ -70,7 +70,7 @@ setup(
     author="Mustafa Abdelwahed",
     author_email="ma342@st-andrews.ac.uk",
     packages=find_packages(),
-    install_requires=[ ],
+    install_requires=["unified-planning"],
     include_package_data=True,
     py_modules=["diversescore"],
     entry_points={
