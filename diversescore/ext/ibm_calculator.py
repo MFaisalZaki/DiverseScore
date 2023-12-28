@@ -36,7 +36,7 @@ def IBMCalculator(domain, problem, planset, plansetsize, metricslist, **kwargs):
                                 problem,
                                 "--diversity-score", score, 
                                 "--internal-plan-files-path", plansdumpdir, 
-                                "--internal-num-plans-to-read", str(plansetsize),
+                                "--internal-num-plans-to-read", str(len(planset)),
                                 ], universal_newlines=True, cwd=metricdir)
             
             maxsum_score = -1
