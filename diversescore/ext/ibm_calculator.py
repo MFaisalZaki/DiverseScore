@@ -36,7 +36,7 @@ def IBMCalculator(domain, problem, planset, dumpplansetsize, selectplansetsize, 
                                 problem,
                                 "--diversity-score", score, 
                                 "--internal-plan-files-path", plansdumpdir, 
-                                "--internal-num-plans-to-read", str(len(planset)),
+                                "--internal-num-plans-to-read", str(dumpplansetsize if dumpplansetsize == selectplansetsize else len(planset)),
                                 ], universal_newlines=True, cwd=metricdir)
             
             maxsum_score = -1
