@@ -14,3 +14,4 @@ from diversescore.models.MaxMean import MaxMean
 from diversescore.utilities import loadPlansDir, computePlanSetStatistics, constructSequentialPlan, simlatePlan, dumpPlans, loadPlansJSON, dumpScores
 
 from diversescore.ext.ibm_calculator import IBMCalculator
+from diversescore.ext.bspace_calculator import BSpaceCalculator
