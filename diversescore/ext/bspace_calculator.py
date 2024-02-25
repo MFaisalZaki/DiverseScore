@@ -37,7 +37,7 @@ def BSpaceCalculator(domain, problem, planset, task, bspace_cfg, **kwargs):
     formulalength = max(set([len(plan) for plan in planset]))
     
     planset = [constructSequentialPlan(planningtask_groundedproblem, plan) for plan in planset]
-
+    
     _bspace = BehaviourSpace(planningtask_groundedproblem, configurations)
     _, _, _ = _bspace.encode(planset[0], formulalength)
     _bspace.extend(planset[1:], skip_sat_test=True)
