@@ -43,7 +43,8 @@ def clone_and_compile_ibm_diversescore():
         patches.append(os.path.join(CURRENT_DIR, "diversescore", "patches", "diverscore.1.patch"))
         for patch in patches:
             try:
-                subprocess.check_call(['git','apply', patch], cwd=CURRENT_DIR)
+                with open(patch, 'rb') as f:
+                    subprocess.check_call(['patch', '-p1'], stdin=f, cwd=CURRENT_DIR)
             except:
                 pass
     except:
