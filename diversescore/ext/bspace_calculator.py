@@ -30,15 +30,9 @@ def BSpaceCalculator(domain, problem, planset, task, bspace_cfg, **kwargs):
             configurations['dims'].append(Functions(parsed_resources=task['resource-details']['fns']))
 
     planningtask = PDDLReader().parse_problem(domain, problem)
-    with Compiler(problem_kind=planningtask.kind, compilation_kind=CompilationKind.GROUNDING) as grounder:
-        grounded_problem = grounder.compile(planningtask, compilation_kind=CompilationKind.GROUNDING).problem
-    planningtask_groundedproblem = grounded_problem
-
-    formulalength = max(set([len(plan) for plan in planset]))
-    
-    planset = [constructSequentialPlan(planningtask_groundedproblem, plan) for plan in planset]
-    
-    _bspace = BehaviourSpace(planningtask_groundedproblem, configurations)
+    _bspace = BehaviourSpace(planningtask, configurations)
+    formulalength = max(set([len(plan)-1 for plan in planset]))
+    planset = [constructSequentialPlan(_bspace.encoder.encoder.ground_problem, plan) for plan in planset]
     _, _, _ = _bspace.encode(planset[0], formulalength)
     _bspace.extend(planset[1:], skip_sat_test=True)
 
