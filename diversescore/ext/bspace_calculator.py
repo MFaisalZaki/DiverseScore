@@ -4,6 +4,7 @@ from collections import defaultdict
 from unified_planning.io import PDDLReader
 from unified_planning.shortcuts import *
 
+from diversescore.utilities import createActionDictFromTask, constructSequentialPlanFromActionDict
 from bspace.shortcuts import *
 
 def BSpaceCalculator(domain, problem, planset, task, bspace_cfg, **kwargs):
@@ -32,7 +33,13 @@ def BSpaceCalculator(domain, problem, planset, task, bspace_cfg, **kwargs):
     planningtask = PDDLReader().parse_problem(domain, problem)
     _bspace = BehaviourSpace(planningtask, configurations)
     formulalength = max(set([len(plan)-1 for plan in planset]))
-    planset = [constructSequentialPlan(_bspace.encoder.encoder.ground_problem, plan) for plan in planset]
+
+    # to reduce the construction time for the planset from txt to SequentialPlan,
+    # we will use a dict the maps the action name to 
+
+    actiondictmap = createActionDictFromTask(_bspace.encoder.encoder.ground_problem)
+    planset = [constructSequentialPlanFromActionDict(plan, actiondictmap, _bspace.encoder.encoder.ground_problem) for plan in planset]
+    
     _, _, _ = _bspace.encode(planset[0], formulalength)
     _bspace.extend(planset[1:], skip_sat_test=True)
 

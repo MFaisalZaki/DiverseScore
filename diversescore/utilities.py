@@ -29,15 +29,20 @@ def computePlanSetStatistics(planset):
     retstats['plan-lengths'] = list(plan_lengths)
     return retstats
 
-def constructSequentialPlan(plan, grounded_problem):
+def createActionDictFromTask(grounded_problem):
+    actiondict = {}
+    for action in grounded_problem.actions:
+        actiondict[action.name] = ActionInstance(action)
+    return actiondict
+
+def constructSequentialPlanFromActionDict(plan, actiondict, grounded_problem):
     """Creates a SequentialPlan for each plan in planset."""
     actionlist = []
     for action in plan:
+        if action.startswith(";"): break #this means that we reached the end of plan.
         actionname = action.replace("(", "").replace(")", "").replace(" ", "_")
-        for problemaction in grounded_problem.actions:
-            if problemaction.name == actionname:
-                actionlist.append(ActionInstance(problemaction))
-                break
+        assert actionname in actiondict, f"Action {actionname} not found in actiondict."
+        actionlist.append(actiondict[actionname])
     return SequentialPlan(actionlist, grounded_problem.environment)
 
 def simlatePlan(plan, grounded_problem):
