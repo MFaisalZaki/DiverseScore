@@ -6,7 +6,7 @@ import os
 
 from diversescore.utilities import dumpPlans
 
-def IBMCalculator(domain, problem, planset, dumpplansetsize, selectplansetsize, metricslist, **kwargs):
+def IBMCalculator(domain, problem, planset, dumpplansetsize, selectplansetsize, metricslist, json_dumpfile, **kwargs):
     downward = pkg_resources.resource_filename(__name__, os.path.join("..", "..", "ibm-diversescore", "fast-downward.py"))
     computed_scores = {}
     with tempfile.TemporaryDirectory(**kwargs) as tempdir:
@@ -29,7 +29,9 @@ def IBMCalculator(domain, problem, planset, dumpplansetsize, selectplansetsize, 
             else:
                 all_metrics = f'compute_{metric.lower()}_metric=true'
 
-            score = f"subset({all_metrics},aggregator_metric=avg,plans_as_multisets=false,plans_subset_size={selectplansetsize},exact_method=false,dump_plans=false,similarity=false,reduce_labels=false)"
+            dumpjsonplans = '' if json_dumpfile is None else f',dump_plans=true,json_file_to_dump={json_dumpfile}'
+
+            score = f"subset({all_metrics},aggregator_metric=avg,plans_as_multisets=false,plans_subset_size={selectplansetsize},exact_method=false,similarity=false,reduce_labels=false{dumpjsonplans})"
             result = subprocess.check_output([sys.executable, 
                                 downward, 
                                 domain, 
