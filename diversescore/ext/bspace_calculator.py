@@ -41,7 +41,17 @@ def BSpaceCalculator(domain, problem, planset, task, bspace_cfg, **kwargs):
     planset = [constructSequentialPlanFromActionDict(plan, actiondictmap, _bspace.encoder.encoder.ground_problem) for plan in planset]
     
     _, _, _ = _bspace.encode(planset[0], formulalength)
-    _bspace.extend(planset[1:], skip_sat_test=True)
+
+    optimise_behaviour_count = kwargs.get('optimise_behaviour_count', False)
+    selected_k_plans = kwargs.get('selected_k_plans', 0)
+
+    if optimise_behaviour_count:
+        # In this mode we need to keep appending plan by plan and check the behaviour count.
+        for idx, plan in enumerate(planset[1:]):
+            _bspace.append(plan, i=idx, run_plan_validation=False, return_bplan=False)
+            if _bspace.behavioursCountScore() >= selected_k_plans: break
+    else:
+        _bspace.extend(planset[1:], skip_sat_test=True)
 
     retscores = defaultdict(dict)
     retscores['behaviours-count'] = _bspace.behavioursCountScore()
