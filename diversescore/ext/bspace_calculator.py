@@ -17,7 +17,7 @@ def BSpaceCalculator(domain, problem, planset, task, bspace_cfg, **kwargs):
         configurations['dims'].append(ResourceCount(parsed_resources=task['resource-details']['objects']))
 
     if eval(bspacecfg.get('include-plan-length-dim', 'False')):
-        configurations['dims'].append(PlanLength())
+        configurations['dims'].append(PlanLength(forceNoActionAfterGoal=False))
 
     if eval(bspacecfg.get('include-goal-ordering-dim', 'False')):
         configurations['dims'].append(GoalOrderingPredicates())
