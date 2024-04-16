@@ -40,7 +40,7 @@ def constructSequentialPlanFromActionDict(plan, actiondict, grounded_problem):
     actionlist = []
     for action in plan:
         if action.startswith(";"): break #this means that we reached the end of plan.
-        actionname = action.replace("(", "").replace(")", "").replace(" ", "_")
+        actionname = action.replace("(", "").replace(" )", "").replace(")", "").replace(" ", "_")
         assert actionname in actiondict, f"Action {actionname} not found in actiondict."
         actionlist.append(actiondict[actionname])
     return SequentialPlan(actionlist, grounded_problem.environment)
