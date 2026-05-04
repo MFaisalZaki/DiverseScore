@@ -1,3 +1,4 @@
+from collections import defaultdict
 from unified_planning.plans import SequentialPlan, ActionInstance
 from unified_planning.shortcuts import *
 
@@ -13,11 +14,8 @@ class Model:
 
     def __call__(self, planset) -> list:
         """Compute the diversity model for planset."""
-        metricscores = {}
+        metricscores = defaultdict(list)
         for metric in self.metrics:
-            if not metric in metricscores:
-                metricscores[str(metric)] = []
-            metric(planset)
             for _i, ip in enumerate(planset):
                 for jp in planset[_i+1:]:
                     metricscores[str(metric)].append(round(1.0 - metric(ip, jp),  5))

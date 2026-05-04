@@ -22,8 +22,8 @@ class Uniqueness(Metric):
         if len(plana[0].actions) < len(planb[0].actions):
             return self(planb, plana)
 
-        plana_actions = set([a.action.name for a in plana[0].actions])
-        planb_actions = set([a.action.name for a in planb[0].actions])
+        plana_actions = set([str(a) for a in plana[0].actions])
+        planb_actions = set([str(a) for a in planb[0].actions])
 
         for action in plana_actions:
             if not action in planb_actions:

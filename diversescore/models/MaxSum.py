@@ -12,9 +12,9 @@ class MaxSum(Model):
            and R. Mart´ı, “Diversity and equity models,” in Handbook of Heuristics, 2018.
     """
 
-    def __init__(self, metric, normalize=False):
+    def __init__(self, metrics, normalize=False):
         """Initialize the metric object."""
-        super(MaxSum, self).__init__(metric=metric, normalize=normalize, name="MaxSum")
+        super().__init__(metrics=metrics, normalize=normalize, name="MaxSum")
         
     def __call__(self, planset):
         """Compute the metric for planset."""
