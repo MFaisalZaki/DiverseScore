@@ -1,6 +1,5 @@
 # DiverseScore
 This Python package computes several diversity models using different distance metrics for plan sets in SAS+ format. 
-Also it wraps [IBM's diversescore](https://github.com/IBM/diversescore.git).
 
 ## Available Diversity Models
 - [x] MaxSum: The sum of pairwise distance between plans in a provided set of plans.
@@ -19,11 +18,6 @@ Also it wraps [IBM's diversescore](https://github.com/IBM/diversescore.git).
 python -m pip install git+
 ```
 
-## CLI
-DiverseScore has a cli, which can be invoked as follows:
-```
-diversescorecli [-h] [-domain DOMAIN] [-problem problem.pddl] [-diversity-model {MaxSum,MaxMin,MaxMean}] [-metric {States,Stability,Uniqueness}] [-plansdir PLANSDIR]
-```
 ## Python Import
 DiverseScore can be integrated into any Python project, here is a simple code to compute the MaxSum score using Stability Metric.
 ```
