@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "diversescore"
-version = "0.1.0"
+version = "0.2.0"
 description = "Diverse score calculator for unified planning interface"
 authors = ["MFaisalZaki <mustafa.faisal.eng@gmail.com>"]
 license = "MIT"
