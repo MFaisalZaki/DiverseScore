@@ -34,12 +34,10 @@ task = PDDLReader().parse_problem(domain, problem)
 
 # Build an action dictionary and load the raw plans from disk
 actiondict = createActionDictFromTask(task)
-raw_plans  = loadPlansDir(plansdir)
 
 # Build (plan, states) tuples: construct each SequentialPlan, then simulate it
 planset = []
-for raw_plan in raw_plans:
-    plan   = constructSequentialPlanFromActionDict(raw_plan, actiondict, task)
+for plan in plans:
     states = simlatePlan(plan, task)
     planset.append((plan, states))
 
