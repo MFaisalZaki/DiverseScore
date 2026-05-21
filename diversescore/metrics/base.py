@@ -4,6 +4,7 @@
 class Metric:
     def __init__(self, name) -> None:
         self.name = name
+        self.cache = {}
         
     def __call__(self, x:tuple, y:tuple):
         """Compute the metric for the plan x and y. Note that x and y are 2-tuples such that

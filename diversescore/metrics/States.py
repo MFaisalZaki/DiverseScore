@@ -21,6 +21,9 @@ class States(Metric):
     
     def __call__(self, plana:tuple, planb:tuple):
         
+        if (plana[0], planb[0]) in self.cache or (planb[0], plana[0]) in self.cache:
+            return self.cache[(plana[0], planb[0])]
+        
         # Create plan states
         plana_states = self._getFluentsValues(plana[1])
         planb_states = self._getFluentsValues(planb[1])
@@ -32,7 +35,10 @@ class States(Metric):
             score += self._delta(plana_state, planb_state)
             k += 1
         k_prime = max(len(plana_states), len(planb_states))
-        return (score + k - k_prime) / k
+        result = (score + k - k_prime) / k
+        self.cache[(plana[0], planb[0])] = result
+        self.cache[(planb[0], plana[0])] = result
+        return result
     
     def _delta(self, state_a, state_b):
         a = set(state_a)

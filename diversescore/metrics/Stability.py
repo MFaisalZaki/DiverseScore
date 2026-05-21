@@ -20,10 +20,13 @@ class Stability(Metric):
     
     def __call__(self, plana:tuple, planb:tuple):
 
-        if len(plana[0].actions) < len(planb[0].actions):
-            return self(planb, plana)
-    
+        if (plana[0], planb[0]) in self.cache or (planb[0], plana[0]) in self.cache:
+            return self.cache[(plana[0], planb[0])]
+
         plana_actions = set([str(a) for a in plana[0].actions])
         planb_actions = set([str(a) for a in planb[0].actions])
 
-        return len(plana_actions.intersection(planb_actions)) / len(plana_actions.union(planb_actions))
+        result = len(set.intersection(plana_actions, planb_actions)) / len(set.union(plana_actions, planb_actions))
+        self.cache[(plana[0], planb[0])] = result
+        self.cache[(planb[0], plana[0])] = result
+        return result
