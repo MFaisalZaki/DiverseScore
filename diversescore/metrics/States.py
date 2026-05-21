@@ -17,6 +17,7 @@ class States(Metric):
 
     def __init__(self):
         """Initialize a states metric object."""
+        self._states_cache = {}
         super(States, self).__init__(name="States")
     
     def __call__(self, plana:tuple, planb:tuple):
@@ -24,9 +25,17 @@ class States(Metric):
         if (plana[0], planb[0]) in self.cache or (planb[0], plana[0]) in self.cache:
             return self.cache[(plana[0], planb[0])]
         
-        # Create plan states
-        plana_states = self._getFluentsValues(plana[1])
-        planb_states = self._getFluentsValues(planb[1])
+        if plana[0] in self._states_cache:
+            plana_states = self._states_cache[plana[0]]
+        else:            
+            plana_states = self._getFluentsValues(plana[1])
+            self._states_cache[plana[0]] = plana_states
+
+        if planb[0] in self._states_cache:
+            planb_states = self._states_cache[planb[0]]
+        else:
+            planb_states = self._getFluentsValues(planb[1])
+            self._states_cache[planb[0]] = planb_states
         
         # Compute the average states similarity scores.
         k = 0
@@ -43,20 +52,21 @@ class States(Metric):
     def _delta(self, state_a, state_b):
         a = set(state_a)
         b = set(state_b)
-        return len(a.intersection(b)) / len(a.union(b))
-    
-    def _getFluentsValues(self, stateslist):
-        """Returns a list of states in fluents-values string format."""
-        _state_vars = set()
-        for var in stateslist[0]._values:
-            value = stateslist[0].get_value(var)
-            _state_vars.add(var)
+        return len(set.intersection(a, b)) / len(set.union(a, b))
 
-        fluents = []
-        for state in stateslist[1:]:
-            _state_vars_values = set()
-            for _state_var in _state_vars:
-                value = state.get_value(_state_var)
-                _state_vars_values.add("{}-{}".format(str(_state_var), str(value)))
-            fluents.append(_state_vars_values)
-        return fluents
+    def _getFluentsValues(self, stateslist):
+        return [set(e[0] for e in filter(lambda f: f[1].is_true() and f[1].is_bool_constant(), state._values.items())) for state in stateslist]
+        # """Returns a list of states in fluents-values string format."""
+        # _state_vars = set()
+        # for var in stateslist[0]._values:
+        #     value = stateslist[0].get_value(var)
+        #     _state_vars.add(var)
+
+        # fluents = []
+        # for state in stateslist[1:]:
+        #     _state_vars_values = set()
+        #     for _state_var in _state_vars:
+        #         value = state.get_value(_state_var)
+        #         _state_vars_values.add("{}-{}".format(str(_state_var), str(value)))
+        #     fluents.append(_state_vars_values)
+        # return fluents
