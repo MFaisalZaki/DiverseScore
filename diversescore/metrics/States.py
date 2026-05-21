@@ -18,16 +18,10 @@ class States(Metric):
     def __init__(self, task, plans):
         """Initialize a states metric object."""
         self._states_cache = {}
-        self._simulated_plans_cache = {}
         super(States, self).__init__(name="States", task=task, plans=plans)
 
     def __call__(self, plana:tuple, planb:tuple):
 
-        # check if the plans are not simulated, then simulate them and cache the results.
-        for plan in [plana, planb]:
-            if plan not in self._simulated_plans_cache:
-                self._simulated_plans_cache[plan] = self._simulate(plan)
-        
         if (plana, planb) in self.cache or (planb, plana) in self.cache:
             return self.cache[(plana, planb)]
         
