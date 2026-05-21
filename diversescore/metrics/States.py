@@ -45,6 +45,7 @@ class States(Metric):
         k = 0
         score = 0.0
         for plana_state, planb_state in zip(plana_states_fluents, planb_states_fluents):
+            if len(set.union(plana_state, planb_state)) == 0: continue
             score += self._delta(plana_state, planb_state)
             k += 1
         k_prime = max(len(plana_states_fluents), len(planb_states_fluents))
