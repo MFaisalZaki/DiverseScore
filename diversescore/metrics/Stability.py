@@ -14,19 +14,19 @@ class Stability(Metric):
            preferences,” Artificial Intelligence, vol. 190, pp. 1–31, 2012.
     """
 
-    def __init__(self):
+    def __init__(self, task, plans):
         """Initialize a stability metric object."""
-        super(Stability, self).__init__(name="Stability")
-    
+        super(Stability, self).__init__(name="Stability", task=task, plans=plans)
+
     def __call__(self, plana:tuple, planb:tuple):
 
-        if (plana[0], planb[0]) in self.cache or (planb[0], plana[0]) in self.cache:
-            return self.cache[(plana[0], planb[0])]
+        if (plana, planb) in self.cache or (planb, plana) in self.cache:
+            return self.cache[(plana, planb)]
 
-        plana_actions = set([str(a) for a in plana[0].actions])
-        planb_actions = set([str(a) for a in planb[0].actions])
+        plana_actions = set([str(a) for a in plana.actions])
+        planb_actions = set([str(a) for a in planb.actions])
 
         result = len(set.intersection(plana_actions, planb_actions)) / len(set.union(plana_actions, planb_actions))
-        self.cache[(plana[0], planb[0])] = result
-        self.cache[(planb[0], plana[0])] = result
+        self.cache[(plana, planb)] = result
+        self.cache[(planb, plana)] = result
         return result

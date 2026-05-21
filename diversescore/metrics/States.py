@@ -15,38 +15,42 @@ class States(Metric):
            preferences,” Artificial Intelligence, vol. 190, pp. 1–31, 2012.
     """
 
-    def __init__(self):
+    def __init__(self, task, plans):
         """Initialize a states metric object."""
         self._states_cache = {}
-        super(States, self).__init__(name="States")
-    
-    def __call__(self, plana:tuple, planb:tuple):
-        
-        if (plana[0], planb[0]) in self.cache or (planb[0], plana[0]) in self.cache:
-            return self.cache[(plana[0], planb[0])]
-        
-        if plana[0] in self._states_cache:
-            plana_states = self._states_cache[plana[0]]
-        else:            
-            plana_states = self._getFluentsValues(plana[1])
-            self._states_cache[plana[0]] = plana_states
+        self._simulated_plans_cache = {}
+        super(States, self).__init__(name="States", task=task, plans=plans)
 
-        if planb[0] in self._states_cache:
-            planb_states = self._states_cache[planb[0]]
-        else:
-            planb_states = self._getFluentsValues(planb[1])
-            self._states_cache[planb[0]] = planb_states
+    def __call__(self, plana:tuple, planb:tuple):
+
+        # check if the plans are not simulated, then simulate them and cache the results.
+        for plan in [plana, planb]:
+            if plan not in self._simulated_plans_cache:
+                self._simulated_plans_cache[plan] = self._simulate(plan)
+        
+        if (plana, planb) in self.cache or (planb, plana) in self.cache:
+            return self.cache[(plana, planb)]
+        
+        plana_states_fluents = list()
+        if not plana in self._states_cache:
+            self._states_cache[plana] = [set(e[0] for e in filter(lambda f: f[1].is_true() and f[1].is_bool_constant(), state._values.items())) for state in self._simulate(plana)]
+        plana_states_fluents = self._states_cache[plana]
+        
+        planb_states_fluents = list()
+        if not planb in self._states_cache:
+            self._states_cache[planb] = [set(e[0] for e in filter(lambda f: f[1].is_true() and f[1].is_bool_constant(), state._values.items())) for state in self._simulate(planb)]
+        planb_states_fluents = self._states_cache[planb]
         
         # Compute the average states similarity scores.
         k = 0
         score = 0.0
-        for plana_state, planb_state in zip(plana_states, planb_states):
+        for plana_state, planb_state in zip(plana_states_fluents, planb_states_fluents):
             score += self._delta(plana_state, planb_state)
             k += 1
-        k_prime = max(len(plana_states), len(planb_states))
+        k_prime = max(len(plana_states_fluents), len(planb_states_fluents))
         result = (score + k - k_prime) / k
-        self.cache[(plana[0], planb[0])] = result
-        self.cache[(planb[0], plana[0])] = result
+        self.cache[(plana, planb)] = result
+        self.cache[(planb, plana)] = result
         return result
     
     def _delta(self, state_a, state_b):
@@ -54,19 +58,16 @@ class States(Metric):
         b = set(state_b)
         return len(set.intersection(a, b)) / len(set.union(a, b))
 
-    def _getFluentsValues(self, stateslist):
-        return [set(e[0] for e in filter(lambda f: f[1].is_true() and f[1].is_bool_constant(), state._values.items())) for state in stateslist]
-        # """Returns a list of states in fluents-values string format."""
-        # _state_vars = set()
-        # for var in stateslist[0]._values:
-        #     value = stateslist[0].get_value(var)
-        #     _state_vars.add(var)
-
-        # fluents = []
-        # for state in stateslist[1:]:
-        #     _state_vars_values = set()
-        #     for _state_var in _state_vars:
-        #         value = state.get_value(_state_var)
-        #         _state_vars_values.add("{}-{}".format(str(_state_var), str(value)))
-        #     fluents.append(_state_vars_values)
-        # return fluents
+    def _simulate(self, plan):
+        """Returns a list of states for plan."""
+        _states = []
+        with SequentialSimulator(problem=self.task) as simulator:
+            initial_state = simulator.get_initial_state()
+            current_state = initial_state
+            _states = [current_state]
+            for action_instance in plan.actions:
+                current_state = simulator.apply(current_state, action_instance)
+                if current_state is None:
+                    return []
+                _states.append(current_state)
+        return _states

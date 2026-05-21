@@ -32,16 +32,10 @@ plansdir = <Path-to-plans-dir>
 # Parse the domain and problem PDDL files
 task = PDDLReader().parse_problem(domain, problem)
 
-# Build an action dictionary and load the raw plans from disk
-actiondict = createActionDictFromTask(task)
-
-# Build (plan, states) tuples: construct each SequentialPlan, then simulate it
-planset = []
-for plan in plans:
-    states = simlatePlan(plan, task)
-    planset.append((plan, states))
+plansliststr = [] # <- container for the plans string.
 
 # Compute a diversity score: MaxSum with the Stability metric
+planset = list(map(lambda p: PDDLReader().parse_plan_string(task, p), plansliststr))
 maxsum_stability_score = MaxSum([Stability()])(planset)
 ```
 

@@ -14,18 +14,19 @@ class Uniqueness(Metric):
            volume 24, 253–261.
     """
 
-    def __init__(self):
+    def __init__(self, task, plans):
         """Initialize a uniqueness metric object."""
-        super(Uniqueness, self).__init__(name="Uniqueness")
-    
+        super(Uniqueness, self).__init__(name="Uniqueness", task=task, plans=plans)
+
     def __call__(self, plana:tuple, planb:tuple):
-        if len(plana[0].actions) < len(planb[0].actions):
-            return self(planb, plana)
+        if (plana, planb) in self.cache or (planb, plana) in self.cache:
+            return self.cache[(plana, planb)]
 
-        plana_actions = set([str(a) for a in plana[0].actions])
-        planb_actions = set([str(a) for a in planb[0].actions])
+        plana_actions = set([str(a) for a in plana.actions])
+        planb_actions = set([str(a) for a in planb.actions])
 
-        for action in plana_actions:
-            if not action in planb_actions:
-                return 0.0
-        return 1.0
+        difference = len(plana_actions - planb_actions) + len(planb_actions - plana_actions)
+        result = 1.0 if difference == 0 else 0.0
+        self.cache[(plana, planb)] = result
+        self.cache[(planb, plana)] = result
+        return result
