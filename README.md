@@ -1,5 +1,5 @@
 # DiverseScore
-This Python package computes several diversity models using different distance metrics for plan sets in SAS+ format. 
+This Python package computes several diversity models using different distance metrics for plan sets, built on top of the [unified-planning](https://github.com/aiplan4eu/unified-planning) framework.
 
 ## Available Diversity Models
 - [x] MaxSum: The sum of pairwise distance between plans in a provided set of plans.
@@ -8,39 +8,53 @@ This Python package computes several diversity models using different distance m
 
 ## Available Distance Functions
 - [x] Stability: Jaccard measure between two plan's actions.
-- [x] States: Average jaccard measure between two plan's states.
+- [x] States: Average Jaccard measure between two plan's states.
 - [x] Uniqueness: Set difference between two plan's actions.
-- [ ] Causal-links: Jaccard measure between two plan's casual links.
+- [ ] Causal-links: Jaccard measure between two plan's causal links.
 
 # How to use
 ## Installation
 ```
-python -m pip install git+
+python -m pip install git+https://github.com/MFaisalZaki/DiverseScore.git
 ```
 
 ## Python Import
-DiverseScore can be integrated into any Python project, here is a simple code to compute the MaxSum score using Stability Metric.
-```
-import os
+Each metric and model in this package operates on `(plan, states)` tuples, where `plan` is a `SequentialPlan` and `states` is the list of states produced by simulating that plan. You no longer need to ground the problem — just parse it, simulate each plan, and pass the resulting tuples to a model.
 
+```python
 from unified_planning.shortcuts import *
 from diversescore.shortcuts import *
 
-domain=<Path-to-domain-PDDL-file>
-problem=<Path-to-problem-PDDL-file>
-plansdir=<Path-to-plans-dir>
-# Read the domain and problem PDDL files
+domain   = <Path-to-domain-PDDL-file>
+problem  = <Path-to-problem-PDDL-file>
+plansdir = <Path-to-plans-dir>
+
+# Parse the domain and problem PDDL files
 task = PDDLReader().parse_problem(domain, problem)
-# Ground the problem
-with Compiler(problem_kind=task.kind, compilation_kind=CompilationKind.GROUNDING) as grounder:
-    groudned_task = grounder.compile(task, compilation_kind=CompilationKind.GROUNDING)
-# Load the plans from directory
-plans = loadPlansDir(plansdir)
-maxsum_stability_score = MaxSum(Stability(groudned_task))
+
+# Build an action dictionary and load the raw plans from disk
+actiondict = createActionDictFromTask(task)
+raw_plans  = loadPlansDir(plansdir)
+
+# Build (plan, states) tuples: construct each SequentialPlan, then simulate it
+planset = []
+for raw_plan in raw_plans:
+    plan   = constructSequentialPlanFromActionDict(raw_plan, actiondict, task)
+    states = simlatePlan(plan, task)
+    planset.append((plan, states))
+
+# Compute a diversity score: MaxSum with the Stability metric
+maxsum_stability_score = MaxSum([Stability()])(planset)
+```
+
+A model accepts a list of metrics, so you can combine several distance functions in a single score:
+
+```python
+score = MaxMean([Stability(), States(), Uniqueness()])(planset)
 ```
 
 ## Citations
-This package implements the distance fucntions proposed by:
+This package implements the distance functions proposed by:
 ```
 @article{nguyen2012generating,
   title={Generating diverse plans to handle unknown and partially known user preferences},
@@ -53,7 +67,7 @@ This package implements the distance fucntions proposed by:
 }
 ```
 
-As for the diversity models are based on:
+As for the diversity models, they are based on:
 ```
 @article{parreno2021measuring,
   title={Measuring diversity. A review and an empirical analysis},
@@ -71,27 +85,5 @@ As for the diversity models are based on:
   author={Fernando Sandoya and Anna Mart{\'i}nez-Gavara and Ricardo Aceves and Abraham Duarte and Rafael Mart{\'i}},
   booktitle={Handbook of Heuristics},
   year={2018}
-}
-```
-
-If you are using IBM's score computation you should cite:
-```
-@InProceedings{katz-sohrabi-aaai2020,
-  title =        "Reshaping diverse planning",
-  author =       "Michael Katz and Shirin Sohrabi",
-  booktitle =    "Proceedings of the Thirty-Fourth {AAAI} Conference on
-                  Artificial Intelligence ({AAAI} 2020)",
-  publisher =    "{AAAI} Press",
-  pages =        "9892--9899",
-  year =         "2020"
-}
-
-@InProceedings{katz-et-al-aaai2022,
-  title =        "Bounding Quality in Diverse Planning",
-  author =       "Michael Katz and Shirin Sohrabi and Octavian Udrea",
-  booktitle =    "Proceedings of the Thirty-Sixth {AAAI} Conference on
-                  Artificial Intelligence ({AAAI} 2022)",
-  publisher =    "{AAAI} Press",
-  year =         "2022"
 }
 ```
