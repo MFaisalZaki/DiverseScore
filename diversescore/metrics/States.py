@@ -18,6 +18,7 @@ class States(Metric):
     def __init__(self, task, plans):
         """Initialize a states metric object."""
         self._states_cache = {}
+        self.state_jaccard = lambda a, b: len(set.intersection(a, b)) / len(set.union(a, b)) if len(set.union(a, b)) > 0 else 1.0
         super(States, self).__init__(name="States", task=task, plans=plans)
 
     def __call__(self, plana:tuple, planb:tuple):
@@ -40,18 +41,13 @@ class States(Metric):
         score = 0.0
         for plana_state, planb_state in zip(plana_states_fluents, planb_states_fluents):
             if len(set.union(plana_state, planb_state)) == 0: continue
-            score += self._delta(plana_state, planb_state)
+            score += self.state_jaccard(plana_state, planb_state)
             k += 1
         k_prime = max(len(plana_states_fluents), len(planb_states_fluents))
         result = (score + k - k_prime) / k
         self.cache[(plana, planb)] = result
         self.cache[(planb, plana)] = result
         return result
-    
-    def _delta(self, state_a, state_b):
-        a = set(state_a)
-        b = set(state_b)
-        return len(set.intersection(a, b)) / len(set.union(a, b))
 
     def _simulate(self, plan):
         """Returns a list of states for plan."""

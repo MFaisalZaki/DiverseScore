@@ -16,6 +16,7 @@ class Stability(Metric):
 
     def __init__(self, task, plans):
         """Initialize a stability metric object."""
+        self._plans_str_cache = {}
         super(Stability, self).__init__(name="Stability", task=task, plans=plans)
 
     def __call__(self, plana:tuple, planb:tuple):
@@ -23,8 +24,13 @@ class Stability(Metric):
         if (plana, planb) in self.cache or (planb, plana) in self.cache:
             return self.cache[(plana, planb)]
 
-        plana_actions = set([str(a) for a in plana.actions])
-        planb_actions = set([str(a) for a in planb.actions])
+        if not plana in self._plans_str_cache:
+            self._plans_str_cache[plana] = set(str(a) for a in plana.actions)
+        plana_actions = self._plans_str_cache[plana]
+        
+        if not planb in self._plans_str_cache:
+            self._plans_str_cache[planb] = set(str(a) for a in planb.actions)
+        planb_actions = self._plans_str_cache[planb]
 
         result = len(set.intersection(plana_actions, planb_actions)) / len(set.union(plana_actions, planb_actions))
         self.cache[(plana, planb)] = result
