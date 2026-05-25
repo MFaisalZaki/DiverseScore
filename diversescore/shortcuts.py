@@ -5,6 +5,8 @@ from diversescore.metrics.base import Metric
 from diversescore.metrics.Stability import Stability
 from diversescore.metrics.States import States
 from diversescore.metrics.Uniqueness import Uniqueness
+from diversescore.metrics.GoalPredicateOrdering import GoalPredicateOrdering
+from diversescore.metrics.ResourceCount import ResourceCount
 
 from diversescore.models.base import Model
 from diversescore.models.MaxSum import MaxSum
