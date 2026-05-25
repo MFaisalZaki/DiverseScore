@@ -56,7 +56,7 @@ class ResourceTransformer(Transformer):
         }
 
 def parse_resource_file(inputfile):
-    if inputfile is None: return []
+    if inputfile is None: return {}
     def read_resource_file(resource_input):
         def construct_parser():
             grammar = r'''
