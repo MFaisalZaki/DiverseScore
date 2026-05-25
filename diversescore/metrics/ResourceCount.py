@@ -1,49 +1,50 @@
 import os
-
 from collections import defaultdict
-from itertools import chain, combinations
+
+import numpy as np
 from lark import Lark, Transformer, v_args
 
 from .base import Metric
 
+
 class ResourceCount(Metric):
-    """Resource count metric class.
-
-    This class implements the resource count metric from [1].
-
-    References
-    ----------
-    """
+    """Resource count metric class."""
 
     def __init__(self, task, plans, addinfo):
-        """Initialize a resource count metric object."""
-        self._ru_cache = {}
-        super(ResourceCount, self).__init__(name="ResourceCount", task=task, plans=plans)
+        super().__init__(name="ResourceCount", task=task, plans=plans)
         self.resource_list = set(e['name'] for e in parse_resource_file(addinfo).values())
+        # id-keyed per-plan cache; see GoalPredicateOrdering for the rationale.
+        self._ru_cache = {id(p): self._compute_resource_usage(p) for p in self.plans}
 
-    def __call__(self, plana:tuple, planb:tuple):
+    def __call__(self, plana, planb):
+        a = self._ru_cache.get(id(plana))
+        if a is None:
+            a = self._compute_resource_usage(plana)
+        b = self._ru_cache.get(id(planb))
+        if b is None:
+            b = self._compute_resource_usage(planb)
+        return abs(a - b)
 
-        if (plana, planb) in self.cache or (planb, plana) in self.cache:
-            return self.cache[(plana, planb)]
-        
-        plana_ru_cnt = list()
-        if not plana in self._ru_cache:
-            self._ru_cache[plana] = self._compute_resource_usage(plana)
-        plana_ru_cnt = self._ru_cache[plana]
-        
-        planb_ru_cnt = list()
-        if not planb in self._ru_cache:
-            self._ru_cache[planb] = self._compute_resource_usage(planb)
-        planb_ru_cnt = self._ru_cache[planb]
+    def pairwise(self, plans=None):
+        plans = self.plans if plans is None else list(plans)
+        vals = []
+        for p in plans:
+            v = self._ru_cache.get(id(p))
+            if v is None:
+                v = self._compute_resource_usage(p)
+            vals.append(v)
+        ru = np.array(vals, dtype=np.float64)
+        return np.abs(ru[:, None] - ru[None, :])
 
-        return abs(plana_ru_cnt - planb_ru_cnt)
-        
     def _compute_resource_usage(self, plan):
-        resource_usage = {o: 0 for o in self.resource_list}
+        rlist = self.resource_list
+        used = set()
         for action in plan.actions:
-            for used_resource in set.intersection(set(map(str, action.actual_parameters)), set(self.resource_list)):
-                resource_usage[used_resource] += 1
-        return len(list(filter(lambda e: e[1] > 0, resource_usage.items())))
+            for p in action.actual_parameters:
+                s = str(p)
+                if s in rlist:
+                    used.add(s)
+        return len(used)
 
 
 class ResourceTransformer(Transformer):
@@ -52,11 +53,14 @@ class ResourceTransformer(Transformer):
             'name': token[0].value,
             'min':  int(token[1].value),
             'max':  int(token[2].value),
-            'delta': int(token[3].value)
+            'delta': int(token[3].value),
         }
 
+
 def parse_resource_file(inputfile):
-    if inputfile is None: return {}
+    if inputfile is None:
+        return {}
+
     def read_resource_file(resource_input):
         def construct_parser():
             grammar = r'''
@@ -69,9 +73,8 @@ def parse_resource_file(inputfile):
                 DELTA: /[0-9]+/
                 %ignore /\s+/
             '''
-            parser = Lark(grammar, parser='lalr', transformer=v_args(inline=True))
-            return parser
-        # readlines in reource_input
+            return Lark(grammar, parser='lalr', transformer=v_args(inline=True))
+
         with open(resource_input, 'r') as f:
             resource_input = f.readlines()
         resource_input = ''.join(resource_input)
@@ -82,8 +85,7 @@ def parse_resource_file(inputfile):
         return resources.children
 
     addition_informaion = defaultdict(dict)
-    if inputfile:
-        assert os.path.exists(inputfile), f'The resources file {inputfile} does not exist.'
-        for resource in read_resource_file(inputfile):
-            addition_informaion[resource['name']] = resource
+    assert os.path.exists(inputfile), f'The resources file {inputfile} does not exist.'
+    for resource in read_resource_file(inputfile):
+        addition_informaion[resource['name']] = resource
     return addition_informaion

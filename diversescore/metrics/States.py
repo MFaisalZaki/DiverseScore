@@ -1,7 +1,9 @@
-from unified_planning.plans import SequentialPlan
-from unified_planning.shortcuts import *
+import numpy as np
+
+from unified_planning.shortcuts import SequentialSimulator
 
 from .base import Metric
+
 
 class States(Metric):
     """States metric class.
@@ -11,54 +13,74 @@ class States(Metric):
     References
     ----------
     .. [1] T. A. Nguyen, M. Do, A. E. Gerevini, I. Serina,
-           B. Srivastava, and S. Kambhampati, “Generating diverse plans to handle unknown and partially known user 
-           preferences,” Artificial Intelligence, vol. 190, pp. 1–31, 2012.
+           B. Srivastava, and S. Kambhampati, "Generating diverse plans to handle unknown and partially known user
+           preferences," Artificial Intelligence, vol. 190, pp. 1-31, 2012.
     """
 
     def __init__(self, task, plans):
-        """Initialize a states metric object."""
-        self._states_cache = {}
-        self.state_jaccard = lambda a, b: len(set.intersection(a, b)) / len(set.union(a, b)) if len(set.union(a, b)) > 0 else 1.0
-        super(States, self).__init__(name="States", task=task, plans=plans)
+        super().__init__(name="States", task=task, plans=plans)
+        # Build the simulator once and reuse across all plans.
+        self._simulator = SequentialSimulator(problem=task)
+        # id-keyed per-plan state-fluent-sets cache.
+        self._states_cache = {id(p): self._extract_state_fluents(p) for p in self.plans}
 
-    def __call__(self, plana:tuple, planb:tuple):
+    def __call__(self, plana, planb):
+        a = self._states_cache.get(id(plana))
+        if a is None:
+            a = self._extract_state_fluents(plana)
+        b = self._states_cache.get(id(planb))
+        if b is None:
+            b = self._extract_state_fluents(planb)
+        return self._compare(a, b)
 
-        if (plana, planb) in self.cache or (planb, plana) in self.cache:
-            return self.cache[(plana, planb)]
-        
-        plana_states_fluents = list()
-        if not plana in self._states_cache:
-            self._states_cache[plana] = [set(e[0] for e in filter(lambda f: f[1].is_true() and f[1].is_bool_constant(), state._values.items())) for state in self._simulate(plana)]
-        plana_states_fluents = self._states_cache[plana]
-        
-        planb_states_fluents = list()
-        if not planb in self._states_cache:
-            self._states_cache[planb] = [set(e[0] for e in filter(lambda f: f[1].is_true() and f[1].is_bool_constant(), state._values.items())) for state in self._simulate(planb)]
-        planb_states_fluents = self._states_cache[planb]
-        
-        # Compute the average states similarity scores.
-        k = 0
+    def pairwise(self, plans=None):
+        plans = self.plans if plans is None else list(plans)
+        feats = []
+        for p in plans:
+            f = self._states_cache.get(id(p))
+            if f is None:
+                f = self._extract_state_fluents(p)
+            feats.append(f)
+        n = len(feats)
+        D = np.zeros((n, n), dtype=np.float64)
+        for i in range(n):
+            ai = feats[i]
+            for j in range(i + 1, n):
+                d = self._compare(ai, feats[j])
+                D[i, j] = d
+                D[j, i] = d
+        return D
+
+    @staticmethod
+    def _compare(a_states, b_states):
         score = 0.0
-        for plana_state, planb_state in zip(plana_states_fluents, planb_states_fluents):
-            if len(set.union(plana_state, planb_state)) == 0: continue
-            score += self.state_jaccard(plana_state, planb_state)
+        k = 0
+        for sa, sb in zip(a_states, b_states):
+            union = sa | sb
+            if not union:
+                continue
+            inter = len(sa & sb)
+            score += inter / len(union)
             k += 1
-        k_prime = max(len(plana_states_fluents), len(planb_states_fluents))
-        result = (score + k - k_prime) / k
-        self.cache[(plana, planb)] = result
-        self.cache[(planb, plana)] = result
-        return result
+        if k == 0:
+            return 0.0
+        k_prime = max(len(a_states), len(b_states))
+        return (score + k - k_prime) / k
+
+    def _extract_state_fluents(self, plan):
+        return [
+            set(e[0] for e in state._values.items()
+                if e[1].is_true() and e[1].is_bool_constant())
+            for state in self._simulate(plan)
+        ]
 
     def _simulate(self, plan):
-        """Returns a list of states for plan."""
-        _states = []
-        with SequentialSimulator(problem=self.task) as simulator:
-            initial_state = simulator.get_initial_state()
-            current_state = initial_state
-            _states = [current_state]
-            for action_instance in plan.actions:
-                current_state = simulator.apply(current_state, action_instance)
-                if current_state is None:
-                    return []
-                _states.append(current_state)
-        return _states
+        sim = self._simulator
+        current = sim.get_initial_state()
+        states = [current]
+        for ai in plan.actions:
+            current = sim.apply(current, ai)
+            if current is None:
+                return []
+            states.append(current)
+        return states
