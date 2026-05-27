@@ -45,6 +45,52 @@ class ResourceCount(Metric):
                 if s in rlist:
                     used.add(s)
         return len(used)
+    
+
+class ResourceUtilisation(Metric):
+    """Resource utilisation metric class."""
+
+    def __init__(self, task, plans, addinfo):
+        super().__init__(name="ResourceUtilisation", task=task, plans=plans)
+        self.resource_list = set(e['name'] for e in parse_resource_file(addinfo).values())
+        # id-keyed per-plan cache; see GoalPredicateOrdering for the rationale.
+        self._ru_cache = {id(p): self._compute_resource_usage(p) for p in self.plans}
+
+    def __call__(self, plana, planb):
+        a = self._ru_cache.get(id(plana))
+        if a is None:
+            a = self._compute_resource_usage(plana)
+        b = self._ru_cache.get(id(planb))
+        if b is None:
+            b = self._compute_resource_usage(planb)
+        keys = set(a) | set(b)
+        return sum(1 for k in keys if a[k] != b[k])
+
+    def pairwise(self, plans=None):
+        plans = self.plans if plans is None else list(plans)
+        usages = []
+        for p in plans:
+            v = self._ru_cache.get(id(p))
+            if v is None:
+                v = self._compute_resource_usage(p)
+            usages.append(v)
+        rlist = sorted(self.resource_list)
+        mat = np.zeros((len(plans), len(rlist)), dtype=np.int64)
+        for i, u in enumerate(usages):
+            for j, r in enumerate(rlist):
+                mat[i, j] = u.get(r, 0)
+        diff = mat[:, None, :] != mat[None, :, :]
+        return diff.sum(axis=2).astype(np.float64)
+
+    def _compute_resource_usage(self, plan):
+        rlist = self.resource_list
+        used = defaultdict(int)
+        for action in plan.actions:
+            for p in action.actual_parameters:
+                s = str(p)
+                if s in rlist:
+                    used[s] += 1
+        return used
 
 
 class ResourceTransformer(Transformer):
