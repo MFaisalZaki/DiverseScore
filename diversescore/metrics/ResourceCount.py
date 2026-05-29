@@ -23,18 +23,30 @@ class ResourceCount(Metric):
         b = self._ru_cache.get(id(planb))
         if b is None:
             b = self._compute_resource_usage(planb)
-        return abs(a - b)
+        union = a | b
+        if not union:
+            return 0.0
+        return 1.0 - len(a & b) / len(union)
 
     def pairwise(self, plans=None):
         plans = self.plans if plans is None else list(plans)
-        vals = []
+        usages = []
         for p in plans:
             v = self._ru_cache.get(id(p))
             if v is None:
                 v = self._compute_resource_usage(p)
-            vals.append(v)
-        ru = np.array(vals, dtype=np.float64)
-        return np.abs(ru[:, None] - ru[None, :])
+            usages.append(v)
+        rlist = sorted(self.resource_list)
+        mat = np.zeros((len(plans), len(rlist)), dtype=bool)
+        for i, u in enumerate(usages):
+            for j, r in enumerate(rlist):
+                mat[i, j] = r in u
+        inter = (mat[:, None, :] & mat[None, :, :]).sum(axis=2)
+        union = (mat[:, None, :] | mat[None, :, :]).sum(axis=2)
+        with np.errstate(divide='ignore', invalid='ignore'):
+            dist = 1.0 - inter / union
+        dist[union == 0] = 0.0
+        return dist
 
     def _compute_resource_usage(self, plan):
         rlist = self.resource_list
@@ -44,7 +56,7 @@ class ResourceCount(Metric):
                 s = str(p)
                 if s in rlist:
                     used.add(s)
-        return len(used)
+        return used
     
 
 class ResourceUtilisation(Metric):
