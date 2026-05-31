@@ -75,8 +75,10 @@ class ResourceUtilisation(Metric):
         b = self._ru_cache.get(id(planb))
         if b is None:
             b = self._compute_resource_usage(planb)
-        keys = set(a) | set(b)
-        return sum(1 for k in keys if a[k] != b[k])
+        union = a | b
+        if not union:
+            return 0.0
+        return 1.0 - len(a & b) / len(union)
 
     def pairwise(self, plans=None):
         plans = self.plans if plans is None else list(plans)
@@ -87,21 +89,25 @@ class ResourceUtilisation(Metric):
                 v = self._compute_resource_usage(p)
             usages.append(v)
         rlist = sorted(self.resource_list)
-        mat = np.zeros((len(plans), len(rlist)), dtype=np.int64)
+        mat = np.zeros((len(plans), len(rlist)), dtype=bool)
         for i, u in enumerate(usages):
             for j, r in enumerate(rlist):
-                mat[i, j] = u.get(r, 0)
-        diff = mat[:, None, :] != mat[None, :, :]
-        return diff.sum(axis=2).astype(np.float64)
+                mat[i, j] = r in u
+        inter = (mat[:, None, :] & mat[None, :, :]).sum(axis=2)
+        union = (mat[:, None, :] | mat[None, :, :]).sum(axis=2)
+        with np.errstate(divide='ignore', invalid='ignore'):
+            dist = inter == union
+        dist[union == 0] = 0.0
+        return dist
 
     def _compute_resource_usage(self, plan):
         rlist = self.resource_list
-        used = defaultdict(int)
+        used = set()
         for action in plan.actions:
             for p in action.actual_parameters:
                 s = str(p)
                 if s in rlist:
-                    used[s] += 1
+                    used.add(s)
         return used
 
 
