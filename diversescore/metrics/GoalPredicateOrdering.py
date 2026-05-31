@@ -41,10 +41,7 @@ class GoalPredicateOrdering(Metric):
         sb = self._seq_cache.get(id(planb))
         if sb is None:
             sb = self._get_sequence(planb)
-        L = len(sb)
-        if L <= 1:
-            return 0.0
-        return sum(1 for x, y in zip(sa, sb) if x != y) / L
+        return 1.0 if sa != sb else 0.0
 
     def pairwise(self, plans=None):
         plans = self.plans if plans is None else list(plans)
@@ -57,11 +54,9 @@ class GoalPredicateOrdering(Metric):
             seqs.append(s)
         if n == 0:
             return np.zeros((0, 0), dtype=np.float64)
-        L = len(seqs[0]) if seqs[0] is not None else 0
-        if L <= 1:
-            return np.zeros((n, n), dtype=np.float64)
         arr = np.asarray(seqs)
-        return (arr[:, None, :] != arr[None, :, :]).sum(axis=2) / L
+        # 1 if two plans differ in goal-predicate ordering, 0 if identical.
+        return (arr[:, None, :] != arr[None, :, :]).any(axis=2).astype(np.float64)
 
     def _simulate(self, plan):
         """Returns a list of states for plan, reusing self._simulator."""
