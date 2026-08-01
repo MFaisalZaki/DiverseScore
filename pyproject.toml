@@ -1,18 +1,33 @@
-[tool.poetry]
-name = "diversescore"
-version = "0.2.0"
-description = "Diverse score calculator for unified planning interface"
-authors = ["MFaisalZaki <mustafa.faisal.eng@gmail.com>"]
+[project]
+name = "plandiversity"
+version = "1.0.0"
+description = "Measure and select diverse sets of plans, over the unified-planning framework"
+authors = [{ name = "MFaisalZaki", email = "mustafa.faisal.eng@gmail.com" }]
 license = "MIT"
 readme = "README.md"
+# Capped below 3.14: unified-planning pulls in scipy, which has no 3.14+ wheels
+# and fails to build from source there.
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "unified-planning (>=1.3.0,<2.0.0)",
+    "numpy (>=1.26)",
+]
+keywords = ["planning", "pddl", "diverse-planning", "unified-planning"]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-lark = "^1.1.9"
-numpy = "1.26.4"
-click = "^8.1.7"
-setuptools= "^74.1.1"
+[project.urls]
+Homepage = "https://github.com/MFaisalZaki/plandiversity"
+Repository = "https://github.com/MFaisalZaki/plandiversity"
+
+[tool.poetry]
+packages = [{ include = "plandiversity" }]
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=8.0"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=2.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
