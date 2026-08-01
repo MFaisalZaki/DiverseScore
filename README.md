@@ -38,9 +38,17 @@ true along the way, so two plans built from entirely different actions can still
 be close if they pass through similar states. Combining a structural metric with
 a semantic one is usually what you want.
 
-All metrics take `(task, plans=None)`. Passing the plan set caches each plan's
-features, which is worth doing when the same set is scored more than once;
-leaving it out computes them per call and gives identical results.
+All metrics take `(task, plans=None)`. **Pass the plan set whenever you will use
+it more than once** — scoring under several models, sweeping `k`, comparing
+metrics. Each plan's features are then extracted once at construction instead of
+once per call, and the results are identical either way.
+
+It matters most for `States`, whose features come from executing the plan:
+simulation is around 90% of its cost, so a second scoring of the same set is
+roughly nine times cheaper warm than cold. For `Stability` and `Uniqueness`
+feature extraction is a few string operations and the difference is negligible.
+A single scoring or a single `select` gains nothing from it — features are
+extracted exactly once per call regardless.
 
 Because `States` executes plans, it needs plans that actually run. One whose
 precondition fails raises `InapplicablePlanError` rather than being scored

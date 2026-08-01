@@ -123,6 +123,23 @@ class TestCaching:
         metric = build(name, task, planset)
         assert np.allclose(metric.pairwise(), metric.pairwise(planset))
 
+    def test_a_subsets_distances_are_the_full_sets_submatrix(
+        self, name, build, task, planset, plan_l1_then_l2_long
+    ):
+        """A distance between two plans cannot depend on what else is in the
+        set. The solvers rely on this: they score a chosen subset by slicing
+        the matrix they already built rather than re-running the metrics.
+        """
+        plans = planset + [plan_l1_then_l2_long]
+        metric = build(name, task, plans)
+        full = metric.pairwise(plans)
+        for subset in ((0, 2), (1, 3), (0, 1, 3), (0, 1, 2, 3)):
+            selected = np.array(subset)
+            assert np.allclose(
+                metric.pairwise([plans[i] for i in subset]),
+                full[np.ix_(selected, selected)],
+            )
+
 
 @pytest.mark.parametrize("name", ALL_METRICS)
 class TestDegenerateInput:

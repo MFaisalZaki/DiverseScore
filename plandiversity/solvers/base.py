@@ -106,7 +106,7 @@ class Solver(ABC):
 
         distances = self.model.distance_matrix(planset)
         indices, optimal = self._choose(distances, k, order)
-        return self._selection(planset, tuple(indices), optimal=optimal)
+        return self._selection(planset, tuple(indices), optimal, distances)
 
     @abstractmethod
     def _choose(self, distances: np.ndarray, k: int, order: np.ndarray):
@@ -116,14 +116,21 @@ class Solver(ABC):
         in that order so that ties resolve towards cheaper plans.
         """
 
-    def _selection(self, planset, indices, optimal) -> Selection:
+    def _selection(self, planset, indices, optimal, distances=None) -> Selection:
         chosen = [planset[index] for index in indices]
-        return Selection(
-            plans=chosen,
-            indices=indices,
-            score=self.model(chosen),
-            optimal=optimal,
-        )
+        if distances is None:
+            # Only the paths that never needed a matrix, where scoring the
+            # chosen plans is the one and only time it gets built.
+            score = self.model(chosen)
+        else:
+            # Score the subset by slicing the matrix already in hand. A
+            # metric's distance between two plans does not depend on what else
+            # is in the set -- that is the Metric.pairwise contract -- so the
+            # submatrix is exactly what re-running the metrics would produce,
+            # without re-extracting a single plan's features.
+            selected = np.asarray(indices, dtype=np.int64)
+            score = self.model.score_matrix(distances[np.ix_(selected, selected)])
+        return Selection(plans=chosen, indices=indices, score=score, optimal=optimal)
 
     @staticmethod
     def _preference_order(n: int, costs) -> np.ndarray:
